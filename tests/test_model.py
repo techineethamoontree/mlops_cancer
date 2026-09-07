@@ -9,13 +9,13 @@ MIN_ACCURACY = 0.95
 MIN_ROC_AUC = 0.98
 
 X, y = load_breast_cancer(return_X_y=True, as_frame=True)
-X_tr, X_te, y_tr, y_te = train_test_split(
-    X, y, test_size=0.25, random_state=42, stratify=y
-)
-pipe = Pipeline([
-    ("scaler", StandardScaler()),
-    ("model", LogisticRegression(C=10.0, max_iter=10000, random_state=42)),
-]).fit(X_tr, y_tr)
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
+pipe = Pipeline(
+    [
+        ("scaler", StandardScaler()),
+        ("model", LogisticRegression(C=10.0, max_iter=10000, random_state=42)),
+    ]
+).fit(X_tr, y_tr)
 
 
 def test_accuracy_and_auc_gate():

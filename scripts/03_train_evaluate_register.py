@@ -1,5 +1,6 @@
 import os
 import sys
+
 import mlflow
 import mlflow.sklearn
 import pandas as pd
@@ -24,8 +25,7 @@ def train_evaluate_register(preprocessing_run_id, C=1.0):
 
         try:
             local_artifact_path = download_artifacts(
-                run_id=preprocessing_run_id,
-                artifact_path="processed_data"
+                run_id=preprocessing_run_id, artifact_path="processed_data"
             )
             train_df = pd.read_csv(os.path.join(local_artifact_path, "train.csv"))
             test_df = pd.read_csv(os.path.join(local_artifact_path, "test.csv"))
@@ -33,15 +33,17 @@ def train_evaluate_register(preprocessing_run_id, C=1.0):
             print(f"Error loading artifacts: {e}")
             sys.exit(1)
 
-        X_train = train_df.drop('target', axis=1)
-        y_train = train_df['target']
-        X_test = test_df.drop('target', axis=1)
-        y_test = test_df['target']
+        X_train = train_df.drop("target", axis=1)
+        y_train = train_df["target"]
+        X_test = test_df.drop("target", axis=1)
+        y_test = test_df["target"]
 
-        pipeline = Pipeline([
-            ('scaler', StandardScaler()),
-            ('model', LogisticRegression(C=C, random_state=42, max_iter=10000))
-        ])
+        pipeline = Pipeline(
+            [
+                ("scaler", StandardScaler()),
+                ("model", LogisticRegression(C=C, random_state=42, max_iter=10000)),
+            ]
+        )
         pipeline.fit(X_train, y_train)
 
         y_pred = pipeline.predict(X_test)
@@ -58,9 +60,7 @@ def train_evaluate_register(preprocessing_run_id, C=1.0):
         mlflow.log_metric("roc_auc", roc_auc)
 
         model_info = mlflow.sklearn.log_model(
-            sk_model=pipeline,
-            name="cancer_classifier_pipeline",
-            input_example=X_train.head(5)
+            sk_model=pipeline, name="cancer_classifier_pipeline", input_example=X_train.head(5)
         )
 
         # Gate ตรวจสอบ 2 เงื่อนไข
@@ -70,9 +70,7 @@ def train_evaluate_register(preprocessing_run_id, C=1.0):
 
             client = MlflowClient()
             client.set_registered_model_alias(
-                name=MODEL_NAME,
-                alias="staging",
-                version=registered_model.version
+                name=MODEL_NAME, alias="staging", version=registered_model.version
             )
             print(f"Set alias '@staging' -> {MODEL_NAME} version {registered_model.version}")
         else:

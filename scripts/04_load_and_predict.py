@@ -14,8 +14,8 @@ def load_and_predict():
         return
 
     data = load_breast_cancer(as_frame=True)
-    X = data.frame.drop('target', axis=1)
-    y = data.frame['target']
+    X = data.frame.drop("target", axis=1)
+    y = data.frame["target"]
 
     # สุ่มดึงตัวอย่างอย่างละ 1 รายจากคลาส 0 (malignant) และคลาส 1 (benign)
     sample_class0 = X[y == 0].iloc[0:1]
@@ -32,7 +32,7 @@ def load_and_predict():
         act_str = class_map[act]
         pred_str = class_map[pred]
         is_correct = "Correct" if act == pred else "Incorrect"
-        print(f"Sample {idx+1}: Actual = {act_str} | Predicted = {pred_str} -> {is_correct}")
+        print(f"Sample {idx + 1}: Actual = {act_str} | Predicted = {pred_str} -> {is_correct}")
     print("-" * 50)
 
 

@@ -1,4 +1,3 @@
-import sys
 import mlflow
 from sklearn.datasets import load_breast_cancer
 
@@ -15,11 +14,11 @@ def validate_data():
         df = data.frame
 
         num_rows, num_cols = df.shape
-        num_classes = df['target'].nunique()
+        num_classes = df["target"].nunique()
         missing_values = df.isnull().sum().sum()
 
         # คำนวณ Class Balance (สัดส่วนของคลาสน้อยสุด)
-        class_counts = df['target'].value_counts(normalize=True)
+        class_counts = df["target"].value_counts(normalize=True)
         min_class_ratio = class_counts.min()
 
         print(f"Dataset shape: {num_rows} rows, {num_cols} columns")
