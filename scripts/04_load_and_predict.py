@@ -1,39 +1,39 @@
 import mlflow
-from sklearn.datasets import load_wine
+import pandas as pd
+from sklearn.datasets import load_breast_cancer
 
 
 def load_and_predict():
-    """
-    Simulates a production scenario by loading a model using an alias
-    from the MLflow Model Registry and using it for prediction.
-    """
-    MODEL_NAME = "wine-classifier-prod"
-    MODEL_ALIAS = "staging"  # MLflow 3 ใช้ Alias แทน Stage เดิม (เช่น staging, champion)
+    MODEL_NAME = "cancer-classifier-prod"
+    MODEL_ALIAS = "staging"
 
-    print(f"Loading model '{MODEL_NAME}' with alias '@{MODEL_ALIAS}'...")
-
-    # Load the model from the Model Registry ด้วย Alias URI
     try:
         model = mlflow.pyfunc.load_model(model_uri=f"models:/{MODEL_NAME}@{MODEL_ALIAS}")
-    except mlflow.exceptions.MlflowException as e:
-        print(f"\nError loading model: {e}")
-        print(f"Please make sure a model version has the alias '@{MODEL_ALIAS}' in the MLflow UI.")
+    except Exception as e:
+        print(f"Error loading model: {e}")
         return
 
-    # Prepare new sample data (as_frame=True เพื่อให้ชื่อคอลัมน์ตรงกับ signature ของโมเดล)
-    X, y = load_wine(return_X_y=True, as_frame=True)
-    sample_data = X.iloc[0:1]  # Using the first row as a sample
-    actual_label = y.iloc[0]
+    data = load_breast_cancer(as_frame=True)
+    X = data.frame.drop('target', axis=1)
+    y = data.frame['target']
 
-    # Use the loaded model to make a prediction
-    # No manual preprocessing is needed because we logged the entire pipeline
-    prediction = model.predict(sample_data)
+    # สุ่มดึงตัวอย่างอย่างละ 1 รายจากคลาส 0 (malignant) และคลาส 1 (benign)
+    sample_class0 = X[y == 0].iloc[0:1]
+    sample_class1 = X[y == 1].iloc[0:1]
 
-    print("-" * 30)
-    print(f"Sample Data Features:\n{sample_data.iloc[0]}")
-    print(f"Actual Label: {actual_label}")
-    print(f"Predicted Label: {prediction[0]}")
-    print("-" * 30)
+    samples = pd.concat([sample_class0, sample_class1])
+    actuals = [0, 1]
+    predictions = model.predict(samples)
+
+    class_map = {0: "malignant", 1: "benign"}
+
+    print("-" * 50)
+    for idx, (act, pred) in enumerate(zip(actuals, predictions)):
+        act_str = class_map[act]
+        pred_str = class_map[pred]
+        is_correct = "Correct" if act == pred else "Incorrect"
+        print(f"Sample {idx+1}: Actual = {act_str} | Predicted = {pred_str} -> {is_correct}")
+    print("-" * 50)
 
 
 if __name__ == "__main__":
